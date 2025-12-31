@@ -37,12 +37,12 @@ def plan_spine(
 
     chosen_model = model or llm.get_default_model()
     prompt = build_prompt(story_spec)
-    content = llm.chat_completion(prompt, chosen_model)
+    content = llm.chat(prompt, chosen_model, temperature=0.4, max_tokens=1500)
 
     spine = parse_and_validate(content)
     if spine is None:
         repair_prompt = build_repair_prompt(content)
-        repaired = llm.chat_completion(repair_prompt, chosen_model)
+        repaired = llm.chat(repair_prompt, chosen_model, temperature=0.4, max_tokens=1500)
         spine = parse_and_validate(repaired)
         if spine is None:
             raise ValueError("LLM response could not be repaired into valid JSON")
@@ -71,9 +71,10 @@ def build_prompt(story_spec: dict[str, Any]) -> list[dict[str, str]]:
     spec_json = json.dumps(story_spec, indent=2, sort_keys=True)
     instruction = (
         "Generate a plot spine JSON object that matches the schema below. "
-        "Return JSON only, no extra text. Keep acts/chapters/scenes counts "
-        "reasonable for the target_length. Scenes must be sequential integers "
-        "starting at 1 across the whole story.\n\n"
+        "Return JSON only, no extra text, no markdown fences. Keep "
+        "acts/chapters/scenes counts reasonable for the target_length. "
+        "Scenes must be sequential integers starting at 1 across the whole "
+        "story, and scenes arrays must contain integers only.\n\n"
         "Schema: {acts: [{act_no, summary, chapters: [{chapter_no, goal, "
         "turning_points, scenes, end_hook?}]}]}\n\n"
         "Story spec JSON:\n"
@@ -87,9 +88,10 @@ def build_prompt(story_spec: dict[str, Any]) -> list[dict[str, str]]:
 
 def build_repair_prompt(invalid_text: str) -> list[dict[str, str]]:
     instruction = (
-        "The previous response was invalid. Return ONLY valid JSON that "
-        "conforms to the plot spine schema: {acts: [{act_no, summary, chapters: "
-        "[{chapter_no, goal, turning_points, scenes, end_hook?}]}]}."
+        "The previous response was invalid. Return ONLY valid JSON (no markdown "
+        "fences) that conforms to the plot spine schema: {acts: [{act_no, "
+        "summary, chapters: [{chapter_no, goal, turning_points, scenes, "
+        "end_hook?}]}]}. Scenes arrays must contain integers only."
         "\nInvalid response:\n"
         f"{invalid_text}"
     )

@@ -53,10 +53,10 @@ def test_plan_spine_writes_output(tmp_path, monkeypatch):
         }
     )
 
-    def fake_chat_completion(messages, model):
+    def fake_chat_completion(messages, model, temperature=0.4, max_tokens=None):
         return spine_json
 
-    monkeypatch.setattr("storycodex.plan_spine.llm.chat_completion", fake_chat_completion)
+    monkeypatch.setattr("storycodex.plan_spine.llm.chat", fake_chat_completion)
 
     runner = CliRunner()
     result = runner.invoke(app, ["plan", "spine", "--root", str(tmp_path)])
@@ -82,11 +82,11 @@ def test_plan_spine_cache_skip(tmp_path, monkeypatch):
 
     called = {"value": False}
 
-    def fake_chat_completion(messages, model):
+    def fake_chat_completion(messages, model, temperature=0.4, max_tokens=None):
         called["value"] = True
         return "{}"
 
-    monkeypatch.setattr("storycodex.plan_spine.llm.chat_completion", fake_chat_completion)
+    monkeypatch.setattr("storycodex.plan_spine.llm.chat", fake_chat_completion)
 
     runner = CliRunner()
     result = runner.invoke(app, ["plan", "spine", "--root", str(tmp_path)])

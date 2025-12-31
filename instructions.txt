@@ -14,6 +14,7 @@ export STORYCODEX_MODEL="gemma3:4b"
 # Only needed if your httpx client insists on an API key header:
 export OPENAI_API_KEY="ollama"
 
+export STORYCODEX_DEBUG_LLM=1       #if want to see llm results
 
 storycodex plan spine --root demo_story --force
 cat demo_story/artifacts/plot/spine.json
