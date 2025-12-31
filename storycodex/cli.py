@@ -92,5 +92,8 @@ def seed_apply(
         typer.secho("Seeds applied.", fg=typer.colors.GREEN)
 
 
-if __name__ == "__main__":
+def main():
     app()
+
+if __name__ == "__main__":
+    main()
