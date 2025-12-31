@@ -1,0 +1,98 @@
+{
+  "acts": [
+    {
+      "act_no": 1,
+      "chapters": [
+        {
+          "chapter_no": 1,
+          "end_hook": "The music box plays a haunting melody and seems to react to the protagonist's presence.",
+          "goal": "Establish the protagonist and their ordinary life.",
+          "scenes": [
+            1,
+            2,
+            3
+          ],
+          "turning_points": [
+            "The protagonist finds a peculiar antique music box."
+          ]
+        },
+        {
+          "chapter_no": 2,
+          "end_hook": "A cryptic message is found hidden within the music box's mechanism.",
+          "goal": "Introduce the initial mystery and the protagonist's determination.",
+          "scenes": [
+            4,
+            5,
+            6
+          ],
+          "turning_points": [
+            "Research reveals the music box's unusual origins and a local legend."
+          ]
+        }
+      ],
+      "summary": "Introduction and Rising Action - The protagonist discovers a strange object and begins investigating."
+    },
+    {
+      "act_no": 2,
+      "chapters": [
+        {
+          "chapter_no": 3,
+          "end_hook": "The antique dealer warns the protagonist to stop his investigation, hinting at a dangerous secret.",
+          "goal": "Develop the mystery and introduce a potential antagonist.",
+          "scenes": [
+            7,
+            8,
+            9,
+            10
+          ],
+          "turning_points": [
+            "The protagonist encounters a secretive antique dealer who knows more than he lets on."
+          ]
+        },
+        {
+          "chapter_no": 4,
+          "end_hook": "The journal reveals a tragic story of betrayal and a hidden treasure.",
+          "goal": "Heighten the stakes and reveal a significant clue.",
+          "scenes": [
+            11,
+            12,
+            13
+          ],
+          "turning_points": [
+            "The protagonist discovers a hidden compartment in the music box containing an old journal."
+          ]
+        }
+      ],
+      "summary": "Investigation and Increasing Danger - The protagonist delves deeper into the mystery, facing obstacles and potential threats."
+    },
+    {
+      "act_no": 3,
+      "chapters": [
+        {
+          "chapter_no": 5,
+          "end_hook": "The protagonist uncovers the true purpose of the music box \u2013 a safeguard against a forgotten evil.",
+          "goal": "Confront the antagonist and reveal the final truth.",
+          "scenes": [
+            14,
+            15,
+            16
+          ],
+          "turning_points": [
+            "The protagonist confronts the antagonist, a descendant of the journal's author, in a climactic showdown."
+          ]
+        },
+        {
+          "chapter_no": 6,
+          "end_hook": "The protagonist decides to safeguard the music box, ensuring the evil remains contained.",
+          "goal": "Resolve the conflict and provide closure.",
+          "scenes": [
+            17,
+            18
+          ],
+          "turning_points": []
+        }
+      ],
+      "summary": "Climax and Resolution - The protagonist confronts the truth and resolves the conflict."
+    }
+  ]
+}

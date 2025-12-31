@@ -203,7 +203,7 @@ def parse_and_validate(
     target_scene_ids: list[int],
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]] | None, list[str]]:
     try:
-        payload = json.loads(content)
+        payload = json.loads(strip_json_fences(content))
     except json.JSONDecodeError:
         return None, None, ["Response is not valid JSON"]
 
@@ -314,3 +314,12 @@ def load_schema(name: str) -> dict[str, Any]:
     schema_path = resources.files("storycodex.schemas").joinpath(name)
     with schema_path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def strip_json_fences(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```") and stripped.endswith("```"):
+        lines = stripped.splitlines()
+        if len(lines) >= 2:
+            return "\n".join(lines[1:-1]).strip()
+    return stripped

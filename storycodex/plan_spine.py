@@ -102,8 +102,9 @@ def build_repair_prompt(invalid_text: str) -> list[dict[str, str]]:
 
 
 def parse_and_validate(content: str) -> dict[str, Any] | None:
+    cleaned = strip_json_fences(content)
     try:
-        data = json.loads(content)
+        data = json.loads(cleaned)
     except json.JSONDecodeError:
         return None
 
@@ -118,6 +119,15 @@ def parse_and_validate(content: str) -> dict[str, Any] | None:
     if errors:
         return None
     return data
+
+
+def strip_json_fences(text: str) -> str:
+    stripped = text.strip()
+    if stripped.startswith("```") and stripped.endswith("```"):
+        lines = stripped.splitlines()
+        if len(lines) >= 2:
+            return "\n".join(lines[1:-1]).strip()
+    return stripped
 
 
 def load_schema() -> dict[str, Any]:
