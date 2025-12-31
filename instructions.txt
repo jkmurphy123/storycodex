@@ -1,0 +1,4 @@
+# run
+cd projects
+source llm_env/bin/activate
+cd storycodex

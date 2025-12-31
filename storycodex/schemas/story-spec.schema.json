@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Story Spec",
+  "type": "object",
+  "required": [
+    "title",
+    "logline",
+    "genre",
+    "tone",
+    "target_length",
+    "pov",
+    "tense",
+    "constraints"
+  ],
+  "properties": {
+    "title": {"type": "string"},
+    "logline": {"type": "string"},
+    "genre": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "tone": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "target_length": {
+      "type": "object",
+      "required": ["unit", "value"],
+      "properties": {
+        "unit": {"enum": ["words", "chapters", "scenes"]},
+        "value": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "pov": {"enum": ["first", "close_third", "omniscient", "epistolary"]},
+    "tense": {"enum": ["past", "present"]},
+    "constraints": {
+      "type": "object",
+      "required": ["must", "must_not"],
+      "properties": {
+        "must": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "must_not": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

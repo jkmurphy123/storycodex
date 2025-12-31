@@ -1,0 +1,20 @@
+{
+  "constraints": {
+    "must": [],
+    "must_not": []
+  },
+  "genre": [
+    "fiction"
+  ],
+  "logline": "A short logline.",
+  "pov": "first",
+  "target_length": {
+    "unit": "words",
+    "value": 1000
+  },
+  "tense": "past",
+  "title": "Untitled Story",
+  "tone": [
+    "neutral"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "constraints": {
+    "must": [
+      "End each chapter with a hook"
+    ],
+    "must_not": []
+  },
+  "genre": [
+    "fiction",
+    "sci-fi",
+    "romance"
+  ],
+  "logline": "A short logline.",
+  "pov": "first",
+  "target_length": {
+    "unit": "words",
+    "value": 1000
+  },
+  "tense": "past",
+  "title": "Argonaut Station: The Lantern Walk",
+  "tone": [
+    "neutral"
+  ]
+}
