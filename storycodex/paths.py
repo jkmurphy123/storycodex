@@ -51,3 +51,23 @@ def plot_spine_path(root: Path) -> Path:
 
 def plot_spine_meta_path(root: Path) -> Path:
     return root / "artifacts" / "plot" / "spine.meta.json"
+
+
+def scenes_dir(root: Path) -> Path:
+    return root / "artifacts" / "scenes"
+
+
+def scenes_index_path(root: Path) -> Path:
+    return scenes_dir(root) / "scenes.json"
+
+
+def scenes_meta_path(root: Path) -> Path:
+    return scenes_dir(root) / "scenes.meta.json"
+
+
+def scene_plan_path(root: Path, scene_id: int) -> Path:
+    return scenes_dir(root) / f"scene_{scene_id:03d}.plan.json"
+
+
+def scene_beats_path(root: Path, scene_id: int) -> Path:
+    return scenes_dir(root) / f"scene_{scene_id:03d}.beats.json"

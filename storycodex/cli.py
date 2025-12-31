@@ -17,6 +17,7 @@ from .paths import (
 )
 from .seed_apply import apply_seeds, write_outputs
 from .plan_spine import plan_spine as run_plan_spine
+from .plan_scenes import plan_scenes as run_plan_scenes
 
 app = typer.Typer(help="StoryCodex CLI")
 seed_app = typer.Typer(help="Seed operations")
@@ -120,6 +121,32 @@ def plan_spine(
         typer.echo(json.dumps(result.spine, indent=2, sort_keys=True))
     elif result:
         typer.secho("Plot spine generated.", fg=typer.colors.GREEN)
+
+
+@plan_app.command("scenes")
+def plan_scenes(
+    root: str = typer.Option(".", "--root", help="Root directory"),
+    chapter: int | None = typer.Option(None, "--chapter", help="Chapter number"),
+    model: str | None = typer.Option(None, "--model", help="Model name"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing outputs"),
+    run_id: str | None = typer.Option(None, "--run-id", help="Run identifier"),
+    json_output: bool = typer.Option(False, "--json", help="Print scenes index JSON"),
+) -> None:
+    """Plan scenes and scene index using LLM guidance."""
+    root_dir = root_path(root)
+    try:
+        result = run_plan_scenes(root_dir, chapter, model, force, run_id)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    if result is None:
+        return
+
+    if json_output:
+        typer.echo(json.dumps(result.index, indent=2, sort_keys=True))
+    else:
+        typer.secho("Scenes planned.", fg=typer.colors.GREEN)
 
 
 def main():

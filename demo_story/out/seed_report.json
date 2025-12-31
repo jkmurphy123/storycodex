@@ -1,8 +1,4 @@
 {
-  "changed_keys": [
-    "constraints.must",
-    "genre",
-    "title"
-  ],
+  "changed_keys": [],
   "version": 1
 }

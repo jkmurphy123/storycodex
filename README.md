@@ -14,6 +14,7 @@ pip install -e '.[test]'
 storycodex init --root .
 storycodex seed apply --root .
 storycodex plan spine --root .
+storycodex plan scenes --root .
 ```
 
 Environment variables:
@@ -38,3 +39,8 @@ export STORYCODEX_BACKEND="openai"
 ```
 
 Default backend is `auto`, which probes `{base_url}/v1/models` and falls back to Ollama.
+
+Scenes planning:
+- `storycodex plan scenes --root .`
+- `storycodex plan scenes --root . --chapter 2`
+- Cast and location_id may be placeholders until character/world steps exist.

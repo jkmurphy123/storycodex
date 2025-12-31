@@ -1,3 +1,4 @@
+import json
 import httpx
 import pytest
 
@@ -8,6 +9,7 @@ class FakeResponse:
     def __init__(self, status_code, payload):
         self.status_code = status_code
         self._payload = payload
+        self.text = json.dumps(payload)
 
     def raise_for_status(self):
         if self.status_code >= 400:

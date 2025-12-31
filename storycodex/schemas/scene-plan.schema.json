@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene Plan",
+  "type": "object",
+  "required": [
+    "scene_id",
+    "chapter_no",
+    "title",
+    "setting",
+    "cast",
+    "goal",
+    "stakes",
+    "beats_ref"
+  ],
+  "properties": {
+    "scene_id": {"type": "integer", "minimum": 1},
+    "chapter_no": {"type": "integer", "minimum": 1},
+    "title": {"type": "string"},
+    "setting": {
+      "type": "object",
+      "required": ["location_id", "time", "mood_tags"],
+      "properties": {
+        "location_id": {"type": "string"},
+        "time": {"type": "string"},
+        "mood_tags": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "cast": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "goal": {"type": "string"},
+    "stakes": {"type": "string"},
+    "beats_ref": {"type": "string"},
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

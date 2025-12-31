@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scenes Index",
+  "type": "object",
+  "required": ["version", "scenes"],
+  "properties": {
+    "version": {"type": "integer", "const": 1},
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scene_id", "chapter_no", "title", "plan_path", "beats_path"],
+        "properties": {
+          "scene_id": {"type": "integer", "minimum": 1},
+          "chapter_no": {"type": "integer", "minimum": 1},
+          "title": {"type": "string"},
+          "plan_path": {"type": "string"},
+          "beats_path": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
