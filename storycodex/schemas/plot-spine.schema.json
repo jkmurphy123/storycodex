@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plot Spine",
+  "type": "object",
+  "required": ["acts"],
+  "properties": {
+    "acts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["act_no", "summary", "chapters"],
+        "properties": {
+          "act_no": {"type": "integer", "minimum": 1},
+          "summary": {"type": "string"},
+          "chapters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["chapter_no", "goal", "turning_points", "scenes"],
+              "properties": {
+                "chapter_no": {"type": "integer", "minimum": 1},
+                "goal": {"type": "string"},
+                "turning_points": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "scenes": {
+                  "type": "array",
+                  "items": {"type": "integer", "minimum": 1}
+                },
+                "end_hook": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

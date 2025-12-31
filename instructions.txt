@@ -2,3 +2,18 @@
 cd projects
 source llm_env/bin/activate
 cd storycodex
+
+
+#test llm
+
+storycodex init --root demo_story
+storycodex seed apply --root demo_story
+
+export STORYCODEX_BASE_URL="http://localhost:11434/v1"
+export STORYCODEX_MODEL="gemma3:4b"
+# Only needed if your httpx client insists on an API key header:
+export OPENAI_API_KEY="ollama"
+
+
+storycodex plan spine --root demo_story --force
+cat demo_story/artifacts/plot/spine.json

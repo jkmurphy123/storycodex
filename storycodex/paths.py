@@ -43,3 +43,11 @@ def inputs_manifest_path(root: Path) -> Path:
 
 def seed_report_path(root: Path) -> Path:
     return root / "out" / "seed_report.json"
+
+
+def plot_spine_path(root: Path) -> Path:
+    return root / "artifacts" / "plot" / "spine.json"
+
+
+def plot_spine_meta_path(root: Path) -> Path:
+    return root / "artifacts" / "plot" / "spine.meta.json"

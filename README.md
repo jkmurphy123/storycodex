@@ -13,4 +13,10 @@ pip install -e '.[test]'
 ```bash
 storycodex init --root .
 storycodex seed apply --root .
+storycodex plan spine --root .
 ```
+
+Environment variables:
+- OPENAI_API_KEY
+- STORYCODEX_BASE_URL
+- STORYCODEX_MODEL
