@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_012.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 4,
+  "goal": "Decipher the journal's story.",
+  "scene_id": 12,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "haunted"
+    ],
+    "time": "night"
+  },
+  "stakes": "None",
+  "title": "Reading the Journal"
+}

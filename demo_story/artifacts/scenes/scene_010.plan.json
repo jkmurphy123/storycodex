@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_010.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 3,
+  "goal": "Protect himself from the dealer.",
+  "scene_id": 10,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "dangerous"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Escalation"
+}

@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_002.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 1,
+  "goal": "Assess the music box's value.",
+  "scene_id": 2,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "intrigued"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Initial Examination"
+}

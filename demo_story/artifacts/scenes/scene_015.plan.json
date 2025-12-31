@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_015.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 5,
+  "goal": "Understand the music box's true purpose.",
+  "scene_id": 15,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "shocked"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "The Revelation"
+}

@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_013.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 4,
+  "goal": "Understand the past events.",
+  "scene_id": 13,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "mournful"
+    ],
+    "time": "night"
+  },
+  "stakes": "None",
+  "title": "The Tragedy"
+}

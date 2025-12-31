@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_004.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 2,
+  "goal": "Decipher the hidden message.",
+  "scene_id": 4,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "suspicious"
+    ],
+    "time": "night"
+  },
+  "stakes": "None",
+  "title": "The Message"
+}

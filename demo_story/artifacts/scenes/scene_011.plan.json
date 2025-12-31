@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_011.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 4,
+  "goal": "Discover the journal's contents.",
+  "scene_id": 11,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "shocked"
+    ],
+    "time": "night"
+  },
+  "stakes": "None",
+  "title": "The Journal Found"
+}

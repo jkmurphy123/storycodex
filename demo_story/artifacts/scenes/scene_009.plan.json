@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_009.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 3,
+  "goal": "Understand the dealer's motives.",
+  "scene_id": 9,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "anxious"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Intense Conversation"
+}

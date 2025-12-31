@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_016.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 5,
+  "goal": "Stop the music box's destructive power.",
+  "scene_id": 16,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "dangerous"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Final Showdown"
+}

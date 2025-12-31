@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_003.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 1,
+  "goal": "Decide whether to purchase the music box.",
+  "scene_id": 3,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "thoughtful"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "First Impressions"
+}

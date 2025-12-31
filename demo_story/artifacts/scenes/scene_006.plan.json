@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_006.beats.json",
+  "cast": [
+    "Elias",
+    "Old Man"
+  ],
+  "chapter_no": 2,
+  "goal": "Gather information from the antique shop owner.",
+  "scene_id": 6,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "concerned"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Local Lore"
+}

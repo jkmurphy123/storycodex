@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_001.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 1,
+  "goal": "Find an interesting antique.",
+  "scene_id": 1,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "curious"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "The Discovery"
+}

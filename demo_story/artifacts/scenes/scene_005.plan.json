@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_005.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 2,
+  "goal": "Investigate the music box's origins.",
+  "scene_id": 5,
+  "setting": {
+    "location_id": "library",
+    "mood_tags": [
+      "focused"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Research Begins"
+}

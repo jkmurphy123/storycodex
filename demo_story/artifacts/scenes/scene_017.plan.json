@@ -1,0 +1,18 @@
+{
+  "beats_ref": "artifacts/scenes/scene_017.beats.json",
+  "cast": [
+    "Elias"
+  ],
+  "chapter_no": 6,
+  "goal": "Secure the music box to prevent future harm.",
+  "scene_id": 17,
+  "setting": {
+    "location_id": "apartment_living_room",
+    "mood_tags": [
+      "determined"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Safeguarding the Box"
+}

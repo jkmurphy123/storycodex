@@ -1,0 +1,11 @@
+{
+  "backend": "ollama",
+  "chapter": null,
+  "created_at": "2025-12-31T22:34:48.584079+00:00",
+  "input_hashes": {
+    "spine": "871e87fec945f912b0e810df86bda8bf5610f3d255f579339ee0bb997e367a3e",
+    "story_spec": "36d5bb6c8a0aaee33c7ef17a9db172c9ceafd9634cb62c874b7f8f23a42b5cfb"
+  },
+  "model": "gemma3:4b",
+  "run_id": null
+}

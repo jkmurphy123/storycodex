@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_007.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 3,
+  "goal": "Obtain more details about the music box.",
+  "scene_id": 7,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "tense"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "The Antique Dealer"
+}

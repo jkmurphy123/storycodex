@@ -1,0 +1,131 @@
+{
+  "scenes": [
+    {
+      "beats_path": "artifacts/scenes/scene_001.beats.json",
+      "chapter_no": 1,
+      "plan_path": "artifacts/scenes/scene_001.plan.json",
+      "scene_id": 1,
+      "title": "The Discovery"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_002.beats.json",
+      "chapter_no": 1,
+      "plan_path": "artifacts/scenes/scene_002.plan.json",
+      "scene_id": 2,
+      "title": "Initial Examination"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_003.beats.json",
+      "chapter_no": 1,
+      "plan_path": "artifacts/scenes/scene_003.plan.json",
+      "scene_id": 3,
+      "title": "First Impressions"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_004.beats.json",
+      "chapter_no": 2,
+      "plan_path": "artifacts/scenes/scene_004.plan.json",
+      "scene_id": 4,
+      "title": "The Message"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_005.beats.json",
+      "chapter_no": 2,
+      "plan_path": "artifacts/scenes/scene_005.plan.json",
+      "scene_id": 5,
+      "title": "Research Begins"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_006.beats.json",
+      "chapter_no": 2,
+      "plan_path": "artifacts/scenes/scene_006.plan.json",
+      "scene_id": 6,
+      "title": "Local Lore"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_007.beats.json",
+      "chapter_no": 3,
+      "plan_path": "artifacts/scenes/scene_007.plan.json",
+      "scene_id": 7,
+      "title": "The Antique Dealer"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_008.beats.json",
+      "chapter_no": 3,
+      "plan_path": "artifacts/scenes/scene_008.plan.json",
+      "scene_id": 8,
+      "title": "Warning"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_009.beats.json",
+      "chapter_no": 3,
+      "plan_path": "artifacts/scenes/scene_009.plan.json",
+      "scene_id": 9,
+      "title": "Intense Conversation"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_010.beats.json",
+      "chapter_no": 3,
+      "plan_path": "artifacts/scenes/scene_010.plan.json",
+      "scene_id": 10,
+      "title": "Escalation"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_011.beats.json",
+      "chapter_no": 4,
+      "plan_path": "artifacts/scenes/scene_011.plan.json",
+      "scene_id": 11,
+      "title": "The Journal Found"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_012.beats.json",
+      "chapter_no": 4,
+      "plan_path": "artifacts/scenes/scene_012.plan.json",
+      "scene_id": 12,
+      "title": "Reading the Journal"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_013.beats.json",
+      "chapter_no": 4,
+      "plan_path": "artifacts/scenes/scene_013.plan.json",
+      "scene_id": 13,
+      "title": "The Tragedy"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_014.beats.json",
+      "chapter_no": 5,
+      "plan_path": "artifacts/scenes/scene_014.plan.json",
+      "scene_id": 14,
+      "title": "Confrontation Begins"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_015.beats.json",
+      "chapter_no": 5,
+      "plan_path": "artifacts/scenes/scene_015.plan.json",
+      "scene_id": 15,
+      "title": "The Revelation"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_016.beats.json",
+      "chapter_no": 5,
+      "plan_path": "artifacts/scenes/scene_016.plan.json",
+      "scene_id": 16,
+      "title": "Final Showdown"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_017.beats.json",
+      "chapter_no": 6,
+      "plan_path": "artifacts/scenes/scene_017.plan.json",
+      "scene_id": 17,
+      "title": "Safeguarding the Box"
+    },
+    {
+      "beats_path": "artifacts/scenes/scene_018.beats.json",
+      "chapter_no": 6,
+      "plan_path": "artifacts/scenes/scene_018.plan.json",
+      "scene_id": 18,
+      "title": "Resolution"
+    }
+  ],
+  "version": 1
+}

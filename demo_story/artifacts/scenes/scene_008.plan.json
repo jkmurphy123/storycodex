@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_008.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 3,
+  "goal": "Heed the dealer's warning.",
+  "scene_id": 8,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "urgent"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Warning"
+}

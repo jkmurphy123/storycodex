@@ -1,0 +1,19 @@
+{
+  "beats_ref": "artifacts/scenes/scene_014.beats.json",
+  "cast": [
+    "Elias",
+    "Silas"
+  ],
+  "chapter_no": 5,
+  "goal": "Uncover the truth behind the music box.",
+  "scene_id": 14,
+  "setting": {
+    "location_id": "antique_shop",
+    "mood_tags": [
+      "tense"
+    ],
+    "time": "day"
+  },
+  "stakes": "None",
+  "title": "Confrontation Begins"
+}
