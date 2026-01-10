@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene Context Packet",
+  "type": "object",
+  "required": ["scene_id", "build", "ringA", "ringB", "ringC"],
+  "properties": {
+    "scene_id": {"type": "integer", "minimum": 1},
+    "build": {
+      "type": "object",
+      "required": [
+        "created_at",
+        "budget_tokens",
+        "resolution_strategy",
+        "include",
+        "sources"
+      ],
+      "properties": {
+        "created_at": {"type": "string", "format": "date-time"},
+        "budget_tokens": {"type": "integer", "minimum": 1000},
+        "resolution_strategy": {
+          "type": "string",
+          "enum": ["auto", "tiny", "medium", "full"]
+        },
+        "include": {"type": "string", "enum": ["ringA", "ringB", "ringC", "all"]},
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifact_id", "resolution_used"],
+            "properties": {
+              "artifact_id": {"type": "string"},
+              "resolution_used": {
+                "type": "string",
+                "enum": ["tiny", "medium", "full"]
+              },
+              "snippets": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ringA": {
+      "type": "object",
+      "required": ["premise", "tone", "pov", "tense", "global_constraints", "style_rules"],
+      "properties": {
+        "premise": {"type": "string"},
+        "tone": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "pov": {"type": "string", "enum": ["first", "close_third", "omniscient", "epistolary"]},
+        "tense": {"type": "string", "enum": ["past", "present"]},
+        "global_constraints": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "style_rules": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "ringB": {
+      "type": "object",
+      "required": ["scene_goal", "setting", "cast", "beats", "continuity_locks"],
+      "properties": {
+        "scene_goal": {"type": "string"},
+        "setting": {
+          "type": "object",
+          "required": ["location", "time", "mood_tags"],
+          "properties": {
+            "location": {
+              "type": "object",
+              "required": ["id", "name", "constraints"],
+              "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"},
+                "constraints": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                }
+              },
+              "additionalProperties": false
+            },
+            "time": {"type": "string"},
+            "mood_tags": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "additionalProperties": false
+        },
+        "cast": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "role",
+              "voice_tics",
+              "current_state",
+              "wants_now",
+              "taboos"
+            ],
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "role": {"type": "string"},
+              "voice_tics": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "current_state": {"type": "string"},
+              "wants_now": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "taboos": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "beats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "description"],
+            "properties": {
+              "type": {"type": "string"},
+              "description": {"type": "string"},
+              "must_include": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "must_avoid": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "continuity_locks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "statement", "severity", "tags"],
+            "properties": {
+              "id": {"type": "string"},
+              "statement": {"type": "string"},
+              "severity": {"type": "string", "enum": ["must", "should"]},
+              "tags": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ringC": {
+      "type": "object",
+      "required": ["prior_scene_summary", "open_threads", "relevant_facts", "glossary"],
+      "properties": {
+        "prior_scene_summary": {"type": "string"},
+        "open_threads": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "relevant_facts": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "glossary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["term", "definition"],
+            "properties": {
+              "term": {"type": "string"},
+              "definition": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

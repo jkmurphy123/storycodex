@@ -25,6 +25,10 @@ def defaults_spec_path(root: Path) -> Path:
     return root / "artifacts" / "defaults" / "story_spec.json"
 
 
+def defaults_plot_intent_path(root: Path) -> Path:
+    return root / "artifacts" / "defaults" / "plot_intent.json"
+
+
 def registry_path(root: Path) -> Path:
     return root / "artifacts" / "registry.json"
 
@@ -33,8 +37,24 @@ def seed_override_path(root: Path) -> Path:
     return root / "seeds" / "story_overrides.json"
 
 
+def seed_plot_override_path(root: Path) -> Path:
+    return root / "seeds" / "plot_overrides.json"
+
+
+def seed_style_profile_path(root: Path) -> Path:
+    return root / "seeds" / "style_profile.json"
+
+
+def seed_style_profile_example_path(root: Path) -> Path:
+    return root / "seeds" / "style_profile.example.json"
+
+
 def inputs_spec_path(root: Path) -> Path:
     return root / "artifacts" / "inputs" / "story_spec.json"
+
+
+def inputs_plot_intent_path(root: Path) -> Path:
+    return root / "artifacts" / "inputs" / "plot_intent.json"
 
 
 def inputs_manifest_path(root: Path) -> Path:
@@ -71,3 +91,15 @@ def scene_plan_path(root: Path, scene_id: int) -> Path:
 
 def scene_beats_path(root: Path, scene_id: int) -> Path:
     return scenes_dir(root) / f"scene_{scene_id:03d}.beats.json"
+
+
+def scene_beats_meta_path(root: Path, scene_id: int) -> Path:
+    return scenes_dir(root) / f"scene_{scene_id:03d}.beats.meta.json"
+
+
+def scene_context_path(root: Path, scene_id: int) -> Path:
+    return scenes_dir(root) / f"scene_{scene_id:03d}.context.json"
+
+
+def scene_context_meta_path(root: Path, scene_id: int) -> Path:
+    return scenes_dir(root) / f"scene_{scene_id:03d}.context.meta.json"

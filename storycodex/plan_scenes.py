@@ -10,6 +10,7 @@ from typing import Any
 
 from . import llm
 from .paths import (
+    inputs_plot_intent_path,
     inputs_spec_path,
     plot_spine_path,
     scene_beats_path,
@@ -54,6 +55,14 @@ def plan_scenes(
     story_spec = json.loads(story_spec_text)
     spine = json.loads(spine_text)
 
+    plot_intent_text = None
+    plot_intent_path = inputs_plot_intent_path(root)
+    if plot_intent_path.exists():
+        plot_intent_text = plot_intent_path.read_text()
+        plot_intent = json.loads(plot_intent_text)
+    else:
+        plot_intent = None
+
     scene_ids_by_chapter, scene_id_to_chapter = extract_scene_ids(spine)
     if chapter is not None:
         if chapter not in scene_ids_by_chapter:
@@ -75,7 +84,7 @@ def plan_scenes(
     chosen_model = model or llm.get_default_model()
     backend_used, _ = llm.resolve_backend(llm.get_base_url(), llm.get_backend_setting())
 
-    prompt = build_prompt(story_spec, spine, chapter)
+    prompt = build_prompt(story_spec, spine, plot_intent, chapter)
     content = llm.chat(prompt, chosen_model, temperature=0.4, max_tokens=2000)
 
     index, plans, errors = parse_and_validate(
@@ -105,14 +114,18 @@ def plan_scenes(
         plan_path = scene_plan_path(root, plan["scene_id"])
         plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n")
 
+    input_hashes = {
+        "story_spec": sha256_text(story_spec_text),
+        "spine": sha256_text(spine_text),
+    }
+    if plot_intent_text:
+        input_hashes["plot_intent"] = sha256_text(plot_intent_text)
+
     meta = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "model": chosen_model,
         "backend": backend_used,
-        "input_hashes": {
-            "story_spec": sha256_text(story_spec_text),
-            "spine": sha256_text(spine_text),
-        },
+        "input_hashes": input_hashes,
         "run_id": run_id,
         "chapter": chapter,
     }
@@ -150,10 +163,14 @@ def extract_scene_ids(spine: dict[str, Any]) -> tuple[dict[int, list[int]], dict
 def build_prompt(
     story_spec: dict[str, Any],
     spine: dict[str, Any],
+    plot_intent: dict[str, Any] | None,
     chapter: int | None,
 ) -> list[dict[str, str]]:
     story_json = json.dumps(story_spec, indent=2, sort_keys=True)
     spine_json = json.dumps(spine, indent=2, sort_keys=True)
+    plot_json = (
+        json.dumps(plot_intent, indent=2, sort_keys=True) if plot_intent is not None else None
+    )
     chapter_line = (
         f"Only include plans for chapter {chapter}."
         if chapter is not None
@@ -215,6 +232,16 @@ def build_prompt(
         "Spine JSON:\n"
         f"{spine_json}"
     )
+
+    if plot_json is not None:
+        instruction = (
+            instruction
+            + "\n\nPlot intent JSON:\n"
+            + plot_json
+            + "\n\n"
+            "Align scene distribution with act_shape beats and ensure plot_constraints "
+            "must_include items appear across scenes."
+        )
     return [
         {"role": "system", "content": "You are a careful story planner."},
         {"role": "user", "content": instruction},

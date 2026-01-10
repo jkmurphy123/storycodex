@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plot Intent",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "plot_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "core_arc": {"type": "string"},
+        "themes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "central_question": {"type": "string"}
+      }
+    },
+    "protagonist_arc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "starting_state": {"type": "string"},
+        "midpoint_state": {"type": "string"},
+        "end_state": {"type": "string"}
+      }
+    },
+    "plot_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "must_include": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "must_not": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "act_shape": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "act_1": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "purpose": {"type": "string"},
+            "beats": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "act_2": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "purpose": {"type": "string"},
+            "beats": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "act_3": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "purpose": {"type": "string"},
+            "beats": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "ending_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resolution_style": {"type": "string"},
+        "final_image": {"type": "string"},
+        "emotional_aftertaste": {"type": "string"}
+      }
+    }
+  }
+}

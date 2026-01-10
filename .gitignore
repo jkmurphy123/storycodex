@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+instructions.txt
+demo_story/
+hp_story/
+demo_1/
+hp_story1/
+hp_story3/

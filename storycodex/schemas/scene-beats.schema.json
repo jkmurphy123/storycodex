@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene Beats",
+  "type": "object",
+  "required": ["scene_id", "beats"],
+  "properties": {
+    "scene_id": {"type": "integer", "minimum": 1},
+    "beats": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entry",
+              "orientation",
+              "pressure",
+              "interaction",
+              "turn",
+              "exit",
+              "reveal",
+              "hook"
+            ]
+          },
+          "description": {"type": "string", "minLength": 1},
+          "must_include": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "must_avoid": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

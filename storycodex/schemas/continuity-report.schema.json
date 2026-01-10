@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Continuity Report",
+  "type": "object",
+  "required": [
+    "scene_id",
+    "input",
+    "summary",
+    "beat_coverage",
+    "lock_checks",
+    "other_issues",
+    "verdict"
+  ],
+  "properties": {
+    "scene_id": {"type": "integer", "minimum": 1},
+    "input": {"type": "string", "enum": ["draft", "final"]},
+    "summary": {"type": "string"},
+    "beat_coverage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "beat_index",
+          "beat_type",
+          "beat_description",
+          "covered",
+          "evidence",
+          "notes"
+        ],
+        "properties": {
+          "beat_index": {"type": "integer", "minimum": 0},
+          "beat_type": {"type": "string"},
+          "beat_description": {"type": "string"},
+          "covered": {"type": "boolean"},
+          "evidence": {"type": "string"},
+          "notes": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "lock_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lock_id",
+          "severity",
+          "statement",
+          "status",
+          "evidence",
+          "notes"
+        ],
+        "properties": {
+          "lock_id": {"type": "string"},
+          "severity": {"type": "string", "enum": ["must", "should"]},
+          "statement": {"type": "string"},
+          "status": {"type": "string", "enum": ["pass", "fail", "unclear"]},
+          "evidence": {"type": "string"},
+          "notes": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "other_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "severity", "description", "evidence"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "pov",
+              "tense",
+              "character_voice",
+              "setting",
+              "timeline",
+              "logic",
+              "other"
+            ]
+          },
+          "severity": {"type": "string", "enum": ["must", "should"]},
+          "description": {"type": "string"},
+          "evidence": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": ["must_fixes", "should_fixes", "ready_for_polish"],
+      "properties": {
+        "must_fixes": {"type": "integer", "minimum": 0},
+        "should_fixes": {"type": "integer", "minimum": 0},
+        "ready_for_polish": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

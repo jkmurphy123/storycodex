@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from . import llm
-from .paths import inputs_spec_path, plot_spine_meta_path, plot_spine_path
+from .paths import inputs_plot_intent_path, inputs_spec_path, plot_spine_meta_path, plot_spine_path
 
 
 @dataclass
@@ -35,8 +35,16 @@ def plan_spine(
     story_spec_text = story_spec_path.read_text()
     story_spec = json.loads(story_spec_text)
 
+    plot_intent_text = None
+    plot_intent_path = inputs_plot_intent_path(root)
+    if plot_intent_path.exists():
+        plot_intent_text = plot_intent_path.read_text()
+        plot_intent = json.loads(plot_intent_text)
+    else:
+        plot_intent = None
+
     chosen_model = model or llm.get_default_model()
-    prompt = build_prompt(story_spec)
+    prompt = build_prompt(story_spec, plot_intent)
     content = llm.chat(prompt, chosen_model, temperature=0.4, max_tokens=1500)
 
     spine = parse_and_validate(content)
@@ -50,10 +58,15 @@ def plan_spine(
     spine_path.parent.mkdir(parents=True, exist_ok=True)
     spine_path.write_text(json.dumps(spine, indent=2, sort_keys=True) + "\n")
 
+    input_hashes = {"story_spec": sha256_text(story_spec_text)}
+    if plot_intent_text:
+        input_hashes["plot_intent"] = sha256_text(plot_intent_text)
+
     meta = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "model": chosen_model,
         "input_hash": sha256_text(story_spec_text),
+        "input_hashes": input_hashes,
         "run_id": run_id,
     }
     meta_path = plot_spine_meta_path(root)
@@ -67,8 +80,14 @@ def sha256_text(text: str) -> str:
     return digest.hexdigest()
 
 
-def build_prompt(story_spec: dict[str, Any]) -> list[dict[str, str]]:
+def build_prompt(
+    story_spec: dict[str, Any],
+    plot_intent: dict[str, Any] | None,
+) -> list[dict[str, str]]:
     spec_json = json.dumps(story_spec, indent=2, sort_keys=True)
+    plot_json = (
+        json.dumps(plot_intent, indent=2, sort_keys=True) if plot_intent is not None else None
+    )
     instruction = (
         "Generate a plot spine JSON object that matches the schema below. "
         "Return JSON only, no extra text, no markdown fences. Keep "
@@ -80,6 +99,18 @@ def build_prompt(story_spec: dict[str, Any]) -> list[dict[str, str]]:
         "Story spec JSON:\n"
         f"{spec_json}"
     )
+
+    if plot_json is not None:
+        instruction = (
+            instruction
+            + "\n\nPlot intent JSON:\n"
+            + plot_json
+            + "\n\n"
+            "Respect plot_constraints.must_include and plot_constraints.must_not, "
+            "use act_shape beats as guiding checkpoints for chapter distribution, "
+            "and preserve plot_intent.core_arc."
+        )
+
     return [
         {"role": "system", "content": "You are a careful story planner."},
         {"role": "user", "content": instruction},

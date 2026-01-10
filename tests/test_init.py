@@ -16,9 +16,11 @@ def test_init_creates_expected_files(tmp_path):
     assert (tmp_path / "out").is_dir()
 
     spec_path = tmp_path / "artifacts" / "defaults" / "story_spec.json"
+    plot_intent_path = tmp_path / "artifacts" / "defaults" / "plot_intent.json"
     registry_path = tmp_path / "artifacts" / "registry.json"
 
     spec = json.loads(spec_path.read_text())
+    plot_intent = json.loads(plot_intent_path.read_text())
     registry = json.loads(registry_path.read_text())
 
     for key in [
@@ -32,5 +34,7 @@ def test_init_creates_expected_files(tmp_path):
         "constraints",
     ]:
         assert key in spec
+    assert "plot_intent" in plot_intent
+    assert "plot_constraints" in plot_intent
 
     assert registry == {"version": 1, "artifacts": []}

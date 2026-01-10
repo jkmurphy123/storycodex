@@ -39,6 +39,19 @@ def get_timeout_seconds() -> float:
         raise ValueError("STORYCODEX_TIMEOUT_SECONDS must be an integer") from exc
 
 
+def get_max_tokens_override() -> int | None:
+    raw = os.getenv("STORYCODEX_MAX_TOKENS_OVERRIDE")
+    if raw is None or raw == "":
+        return None
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError("STORYCODEX_MAX_TOKENS_OVERRIDE must be an integer") from exc
+    if value < 1:
+        raise ValueError("STORYCODEX_MAX_TOKENS_OVERRIDE must be >= 1")
+    return value
+
+
 def debug_enabled() -> bool:
     value = os.getenv("STORYCODEX_DEBUG_LLM", "")
     return value.lower() in {"1", "true", "yes", "on"}
@@ -103,6 +116,8 @@ def chat(
     if backend == "openai" and api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 
+    max_tokens = get_max_tokens_override() or max_tokens
+
     if backend == "openai":
         payload: dict[str, Any] = {
             "model": model,
@@ -119,6 +134,8 @@ def chat(
             "stream": False,
             "options": {"temperature": temperature},
         }
+        if max_tokens is not None:
+            payload["options"]["num_predict"] = max_tokens
         url = f"{resolved_base}/api/chat"
 
     if debug_enabled():

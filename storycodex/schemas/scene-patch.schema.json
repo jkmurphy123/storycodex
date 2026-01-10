@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene Patch",
+  "type": "object",
+  "required": ["scene_id", "input", "operations"],
+  "properties": {
+    "scene_id": {"type": "integer", "minimum": 1},
+    "input": {"type": "string", "enum": ["draft", "final"]},
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op", "priority", "target", "instruction", "rationale", "must_preserve"],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": ["replace_span", "insert_after", "delete_span", "rewrite_paragraph"]
+          },
+          "priority": {"type": "integer"},
+          "target": {"type": "string"},
+          "instruction": {"type": "string"},
+          "rationale": {"type": "string"},
+          "must_preserve": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

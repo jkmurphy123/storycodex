@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Style Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {"type": "string"},
+    "profile_name": {"type": "string"},
+    "intent": {"type": "string"},
+    "tone": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "diction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "register": {"type": "string"},
+        "allowed": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "avoid": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "note": {"type": "string"}
+      }
+    },
+    "syntax": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sentence_rhythm": {"type": "string"},
+        "paragraphing": {"type": "string"},
+        "rhetorical_devices": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "sensory": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "priority_order": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "motifs": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "grotesque_policy": {"type": "string"}
+      }
+    },
+    "horror_engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "principles": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "escalation_curve": {"type": "string"},
+        "taboos": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "character_voice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "narrator_feel": {"type": "string"},
+        "habits": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "unreliability": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "style": {"type": "string"},
+        "subtext_rule": {"type": "string"},
+        "common_moves": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "scene_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "must_include": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "must_not": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "output_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metaphor_density": {"type": "string", "enum": ["low", "medium", "high"]},
+        "exposition_throttle": {"type": "string"},
+        "violence": {"type": "string", "enum": ["low", "medium", "high"]},
+        "gore": {"type": "string", "enum": ["low", "medium", "high"]}
+      }
+    }
+  }
+}
