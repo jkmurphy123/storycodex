@@ -22,6 +22,7 @@ from .paths import (
     root_path,
     seed_report_path,
     seed_style_profile_example_path,
+    worldcodex_export_path,
 )
 from .seed_apply import apply_seeds, write_outputs
 from .plan_spine import plan_spine as run_plan_spine
@@ -31,16 +32,19 @@ from .build_context import build_context as run_build_context
 from .write_scene import write_scene as run_write_scene
 from .write_diary import write_diary as run_write_diary
 from .check_continuity import check_continuity as run_check_continuity
+from .worldcodex_client import WorldCodexClientError, build_worldcodex_client
 
 app = typer.Typer(help="StoryCodex CLI")
 seed_app = typer.Typer(help="Seed operations")
 plan_app = typer.Typer(help="Planning operations")
 write_app = typer.Typer(help="Writing operations")
 check_app = typer.Typer(help="Check operations")
+world_app = typer.Typer(help="WorldCodex operations")
 app.add_typer(seed_app, name="seed")
 app.add_typer(plan_app, name="plan")
 app.add_typer(write_app, name="write")
 app.add_typer(check_app, name="check")
+app.add_typer(world_app, name="world")
 
 
 def write_json(path: Path, payload: dict, force: bool) -> None:
@@ -53,6 +57,48 @@ def ensure_writable(paths: list[Path], force: bool) -> None:
     for path in paths:
         if path.exists() and not force:
             raise FileExistsError(f"Refusing to overwrite {path} without --force")
+
+
+@world_app.command("export")
+def world_export(
+    root: str = typer.Option(".", "--root", help="Root directory"),
+    context: str = typer.Option("story-context", "--context", help="WorldCodex context type"),
+    world: str | None = typer.Option(None, "--world", help="WorldCodex world id or path"),
+    location: str = typer.Option("", "--location", help="Optional WorldCodex location atom id"),
+    character: str = typer.Option("", "--character", help="Optional WorldCodex character atom id"),
+    faction: str = typer.Option("", "--faction", help="Optional WorldCodex faction atom id"),
+    tag: str = typer.Option("", "--tag", help="Optional WorldCodex tag filter"),
+    canon_tier: str = typer.Option("", "--canon-tier", help="Optional canon tier filter"),
+    force: bool = typer.Option(False, "--force", help="Overwrite cached export"),
+    json_output: bool = typer.Option(False, "--json", help="Print export JSON"),
+) -> None:
+    """Export and cache a WorldCodex context for StoryCodex."""
+    root_dir = root_path(root)
+    output_path = worldcodex_export_path(root_dir, context)
+    if output_path.exists() and not force:
+        typer.secho(f"Refusing to overwrite {output_path} without --force", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    try:
+        client = build_worldcodex_client(world=world)
+        payload = client.export_context(
+            context,
+            location_id=location,
+            character_id=character,
+            faction_id=faction,
+            tag=tag,
+            canon_tier=canon_tier,
+        )
+    except (ValueError, WorldCodexClientError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    if json_output:
+        typer.echo(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        typer.secho(f"WorldCodex {context} export cached at {output_path}", fg=typer.colors.GREEN)
 
 
 @app.command("init")

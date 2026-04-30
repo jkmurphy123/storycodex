@@ -16,6 +16,7 @@ storycodex seed apply --root .
 storycodex plan spine --root .
 storycodex plan scenes --root .
 storycodex plan beats --root . --scene 1
+storycodex world export --root . --context story-context --character character.example
 storycodex build-context --root . --scene 1
 storycodex write scene --root . --scene 1
 storycodex check continuity --root . --scene 1
@@ -46,6 +47,9 @@ Environment variables:
 - STORYCODEX_BACKEND
 - STORYCODEX_MODEL
 - STORYCODEX_TIMEOUT_SECONDS
+- STORYCODEX_WORLDCODEX_WORLD
+- STORYCODEX_WORLDCODEX_CLI
+- STORYCODEX_WORLDCODEX_TIMEOUT_SECONDS
 
 Ollama example:
 ```bash
@@ -77,6 +81,11 @@ Context building:
 - `storycodex build-context --root . --scene 1`
 - Compiles Ring A/B/C context for drafting from plans and beats.
 - Optional artifacts: continuity locks/facts, world/characters at tiny/medium/full, character state.
+
+WorldCodex boundary:
+- `storycodex world export --root . --context story-context` caches a WorldCodex export under `artifacts/worldcodex/`.
+- `STORYCODEX_WORLDCODEX_WORLD` should point to the WorldCodex world id or path.
+- Later milestones will use these exports directly in scene planning and context building.
 
 Writing:
 - `storycodex write scene --root . --scene 1`

@@ -103,3 +103,12 @@ def scene_context_path(root: Path, scene_id: int) -> Path:
 
 def scene_context_meta_path(root: Path, scene_id: int) -> Path:
     return scenes_dir(root) / f"scene_{scene_id:03d}.context.meta.json"
+
+
+def worldcodex_cache_dir(root: Path) -> Path:
+    return root / "artifacts" / "worldcodex"
+
+
+def worldcodex_export_path(root: Path, context_type: str) -> Path:
+    safe_name = context_type.strip().lower().replace("_", "-")
+    return worldcodex_cache_dir(root) / f"{safe_name}.json"
