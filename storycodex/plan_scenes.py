@@ -18,6 +18,7 @@ from .paths import (
     scenes_index_path,
     scenes_meta_path,
 )
+from .worldcodex_client import WorldCodexClientError, build_worldcodex_client, get_worldcodex_world
 
 
 @dataclass
@@ -33,6 +34,14 @@ def plan_scenes(
     model: str | None,
     force: bool,
     run_id: str | None,
+    world: str | None = None,
+    world_context: str = "story-context",
+    location: str = "",
+    character: str = "",
+    faction: str = "",
+    tag: str = "",
+    canon_tier: str = "",
+    use_worldcodex: bool = True,
 ) -> PlanScenesResult | None:
     index_path = scenes_index_path(root)
     if chapter is None and index_path.exists() and not force:
@@ -63,6 +72,20 @@ def plan_scenes(
     else:
         plot_intent = None
 
+    worldcodex_context = None
+    if use_worldcodex:
+        worldcodex_context = load_worldcodex_context(
+            story_spec,
+            plot_intent,
+            world=world,
+            context_type=world_context,
+            location=location,
+            character=character,
+            faction=faction,
+            tag=tag,
+            canon_tier=canon_tier,
+        )
+
     scene_ids_by_chapter, scene_id_to_chapter = extract_scene_ids(spine)
     if chapter is not None:
         if chapter not in scene_ids_by_chapter:
@@ -84,7 +107,7 @@ def plan_scenes(
     chosen_model = model or llm.get_default_model()
     backend_used, _ = llm.resolve_backend(llm.get_base_url(), llm.get_backend_setting())
 
-    prompt = build_prompt(story_spec, spine, plot_intent, chapter)
+    prompt = build_prompt(story_spec, spine, plot_intent, chapter, worldcodex_context)
     content = llm.chat(prompt, chosen_model, temperature=0.4, max_tokens=2000)
 
     index, plans, errors = parse_and_validate(
@@ -120,6 +143,10 @@ def plan_scenes(
     }
     if plot_intent_text:
         input_hashes["plot_intent"] = sha256_text(plot_intent_text)
+    if worldcodex_context is not None:
+        input_hashes["worldcodex_context"] = sha256_text(
+            json.dumps(worldcodex_context, sort_keys=True)
+        )
 
     meta = {
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -128,11 +155,71 @@ def plan_scenes(
         "input_hashes": input_hashes,
         "run_id": run_id,
         "chapter": chapter,
+        "worldcodex": worldcodex_context.get("metadata") if isinstance(worldcodex_context, dict) else None,
     }
     meta_path = scenes_meta_path(root)
     meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
 
     return PlanScenesResult(index=index, plans=plans, meta=meta)
+
+
+def load_worldcodex_context(
+    story_spec: dict[str, Any],
+    plot_intent: dict[str, Any] | None,
+    *,
+    world: str | None,
+    context_type: str,
+    location: str,
+    character: str,
+    faction: str,
+    tag: str,
+    canon_tier: str,
+) -> dict[str, Any] | None:
+    binding = worldcodex_binding(story_spec, plot_intent)
+    resolved_world = world or binding.get("world") or get_worldcodex_world()
+    if not resolved_world:
+        return None
+
+    resolved_location = location or first_item(binding.get("primary_location_ids"))
+    resolved_character = character or binding.get("protagonist_id") or first_item(binding.get("required_cast_ids"))
+    resolved_faction = faction or first_item(binding.get("primary_faction_ids"))
+    resolved_tag = tag or first_item(binding.get("tags"))
+    resolved_canon_tier = canon_tier or binding.get("canon_tier", "")
+
+    client = build_worldcodex_client(world=resolved_world)
+    try:
+        return client.export_context(
+            context_type,
+            location_id=resolved_location,
+            character_id=resolved_character,
+            faction_id=resolved_faction,
+            tag=resolved_tag,
+            canon_tier=resolved_canon_tier,
+        )
+    except WorldCodexClientError as exc:
+        raise RuntimeError(f"Unable to load WorldCodex context for scene planning: {exc}") from exc
+
+
+def worldcodex_binding(story_spec: dict[str, Any], plot_intent: dict[str, Any] | None) -> dict[str, Any]:
+    binding: dict[str, Any] = {}
+    spec_binding = story_spec.get("worldcodex")
+    if isinstance(spec_binding, dict):
+        binding.update(spec_binding)
+    if isinstance(plot_intent, dict):
+        intent_binding = plot_intent.get("worldcodex")
+        if isinstance(intent_binding, dict):
+            binding.update({key: value for key, value in intent_binding.items() if value})
+    return binding
+
+
+def first_item(value: Any) -> str:
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                return item
+    if isinstance(value, str):
+        return value
+    return ""
 
 
 def sha256_text(text: str) -> str:
@@ -165,6 +252,7 @@ def build_prompt(
     spine: dict[str, Any],
     plot_intent: dict[str, Any] | None,
     chapter: int | None,
+    worldcodex_context: dict[str, Any] | None = None,
 ) -> list[dict[str, str]]:
     story_json = json.dumps(story_spec, indent=2, sort_keys=True)
     spine_json = json.dumps(spine, indent=2, sort_keys=True)
@@ -175,6 +263,11 @@ def build_prompt(
         f"Only include plans for chapter {chapter}."
         if chapter is not None
         else "Include plans for all chapters."
+    )
+    worldcodex_json = (
+        json.dumps(compact_worldcodex_context(worldcodex_context), indent=2, sort_keys=True)
+        if worldcodex_context is not None
+        else None
     )
     instruction = (
         "Generate a JSON object with two keys: index and plans. BOTH keys are required. "
@@ -189,8 +282,7 @@ def build_prompt(
         "plans must be a list of scene-plan objects with required fields, and there must be one plan per scene_id. "
         "Do not omit the plans list: it is required even if brief. "
         "{scene_id, chapter_no, title, setting, cast, goal, stakes, beats_ref}. "
-        "setting must be an object: {location_id, time, mood_tags} and "
-        "location_id must be a short slug (e.g. argonaut_station_corridor). "
+        "setting must be an object: {location_id, time, mood_tags}. "
         "beats_ref must equal the matching beats_path. "
         "Keep cast to 0-4 entries. Keep content concise. "
         f"{chapter_line}\n\n"
@@ -233,6 +325,19 @@ def build_prompt(
         f"{spine_json}"
     )
 
+    if worldcodex_json is not None:
+        instruction = (
+            instruction
+            + "\n\nWorldCodex context JSON:\n"
+            + worldcodex_json
+            + "\n\n"
+            "Use WorldCodex atom IDs when choosing scene settings and cast. "
+            "If a suitable place exists, setting.location_id must be that place atom ID, e.g. place.example. "
+            "If a suitable character exists, cast entries must use character atom IDs, e.g. character.example. "
+            "Do not invent new canonical places, characters, factions, or conflicts when a provided atom fits. "
+            "If the story needs a new non-canon placeholder, add a note explaining that it is story-local."
+        )
+
     if plot_json is not None:
         instruction = (
             instruction
@@ -246,6 +351,43 @@ def build_prompt(
         {"role": "system", "content": "You are a careful story planner."},
         {"role": "user", "content": instruction},
     ]
+
+
+def compact_worldcodex_context(context: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(context, dict):
+        return {}
+    return {
+        "metadata": context.get("metadata", {}),
+        "places": compact_atoms(context.get("places", [])),
+        "characters": compact_atoms(context.get("characters", [])),
+        "factions": compact_atoms(context.get("factions", [])),
+        "conflicts": compact_atoms(context.get("conflicts", [])),
+        "relationships": context.get("relationships", [])[:20] if isinstance(context.get("relationships"), list) else [],
+        "timeline": compact_atoms(context.get("timeline", []), limit=20),
+        "open_threads": compact_atoms(context.get("open_threads", []), limit=20),
+    }
+
+
+def compact_atoms(value: Any, limit: int = 30) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    results: list[dict[str, Any]] = []
+    for item in value[:limit]:
+        if not isinstance(item, dict):
+            continue
+        data = item.get("data") if isinstance(item.get("data"), dict) else {}
+        compact = {
+            "id": item.get("id"),
+            "type": item.get("type"),
+            "name": item.get("name"),
+            "summary": item.get("summary"),
+        }
+        if data:
+            for key in ["role", "logline", "story_hooks", "prompt_hooks", "current_state", "stakes", "current_state"]:
+                if key in data:
+                    compact[key] = data[key]
+        results.append({key: value for key, value in compact.items() if value not in (None, "", [])})
+    return results
 
 
 def build_repair_prompt(invalid_text: str, errors: list[str]) -> list[dict[str, str]]:

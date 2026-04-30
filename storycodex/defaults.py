@@ -10,6 +10,15 @@ DEFAULT_STORY_SPEC = {
     "pov": "first",
     "tense": "past",
     "constraints": {"must": [], "must_not": []},
+    "worldcodex": {
+        "world": "",
+        "protagonist_id": "",
+        "required_cast_ids": [],
+        "primary_location_ids": [],
+        "primary_faction_ids": [],
+        "tags": [],
+        "canon_tier": "",
+    },
 }
 
 DEFAULT_PLOT_INTENT = {

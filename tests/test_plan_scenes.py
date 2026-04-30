@@ -201,3 +201,79 @@ def test_plan_scenes_chapter_only(tmp_path, monkeypatch):
 
     chapter_plan = scene_plan_path(tmp_path, 3)
     assert chapter_plan.exists()
+
+
+def test_plan_scenes_includes_worldcodex_context_in_prompt(tmp_path, monkeypatch):
+    write_story_spec(tmp_path)
+    write_spine(tmp_path)
+
+    wrapper = build_wrapper()
+    wrapper["plans"][0]["setting"]["location_id"] = "place.glass_harbor"
+    wrapper["plans"][0]["cast"] = ["character.elara"]
+
+    class FakeWorldCodexClient:
+        def export_context(self, context_type, **kwargs):
+            return {
+                "metadata": {
+                    "schema_version": "worldcodex.context.v1",
+                    "export_type": context_type,
+                    "world_id": "titan-osa",
+                    "source_atom_ids": ["place.glass_harbor", "character.elara"],
+                },
+                "places": [
+                    {
+                        "id": "place.glass_harbor",
+                        "type": "place",
+                        "name": "Glass Harbor",
+                        "summary": "A corporate port district.",
+                    }
+                ],
+                "characters": [
+                    {
+                        "id": "character.elara",
+                        "type": "character",
+                        "name": "Elara Myung",
+                        "summary": "An investigator under pressure.",
+                    }
+                ],
+                "factions": [],
+                "conflicts": [],
+                "relationships": [],
+                "timeline": [],
+            }
+
+    monkeypatch.setattr("storycodex.plan_scenes.build_worldcodex_client", lambda world=None: FakeWorldCodexClient())
+    monkeypatch.setenv("STORYCODEX_BACKEND", "openai")
+    captured = {}
+
+    def fake_chat(messages, model, temperature=0.4, max_tokens=None):
+        captured["prompt"] = messages[-1]["content"]
+        return json.dumps(wrapper)
+
+    monkeypatch.setattr("storycodex.plan_scenes.llm.chat", fake_chat)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        [
+            "plan",
+            "scenes",
+            "--root",
+            str(tmp_path),
+            "--world",
+            "titan-osa",
+            "--character",
+            "character.elara",
+            "--location",
+            "place.glass_harbor",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "WorldCodex context JSON" in captured["prompt"]
+    assert "place.glass_harbor" in captured["prompt"]
+    assert "character.elara" in captured["prompt"]
+
+    plan = json.loads(scene_plan_path(tmp_path, 1).read_text())
+    assert plan["setting"]["location_id"] == "place.glass_harbor"
+    assert plan["cast"] == ["character.elara"]

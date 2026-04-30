@@ -186,12 +186,34 @@ def plan_scenes(
     model: str | None = typer.Option(None, "--model", help="Model name"),
     force: bool = typer.Option(False, "--force", help="Overwrite existing outputs"),
     run_id: str | None = typer.Option(None, "--run-id", help="Run identifier"),
+    world: str | None = typer.Option(None, "--world", help="WorldCodex world id or path"),
+    world_context: str = typer.Option("story-context", "--world-context", help="WorldCodex context type"),
+    location: str = typer.Option("", "--location", help="Optional WorldCodex location atom id"),
+    character: str = typer.Option("", "--character", help="Optional WorldCodex character atom id"),
+    faction: str = typer.Option("", "--faction", help="Optional WorldCodex faction atom id"),
+    tag: str = typer.Option("", "--tag", help="Optional WorldCodex tag filter"),
+    canon_tier: str = typer.Option("", "--canon-tier", help="Optional WorldCodex canon tier filter"),
+    no_worldcodex: bool = typer.Option(False, "--no-worldcodex", help="Skip WorldCodex context during scene planning"),
     json_output: bool = typer.Option(False, "--json", help="Print scenes index JSON"),
 ) -> None:
     """Plan scenes and scene index using LLM guidance."""
     root_dir = root_path(root)
     try:
-        result = run_plan_scenes(root_dir, chapter, model, force, run_id)
+        result = run_plan_scenes(
+            root_dir,
+            chapter,
+            model,
+            force,
+            run_id,
+            world=world,
+            world_context=world_context,
+            location=location,
+            character=character,
+            faction=faction,
+            tag=tag,
+            canon_tier=canon_tier,
+            use_worldcodex=not no_worldcodex,
+        )
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED)
         raise typer.Exit(code=1) from exc

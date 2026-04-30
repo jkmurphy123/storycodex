@@ -50,6 +50,31 @@
         }
       },
       "additionalProperties": false
+    },
+    "worldcodex": {
+      "type": "object",
+      "properties": {
+        "world": {"type": "string"},
+        "protagonist_id": {"type": "string"},
+        "required_cast_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "primary_location_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "primary_faction_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "canon_tier": {"type": "string"}
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

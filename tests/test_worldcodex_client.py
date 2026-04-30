@@ -8,6 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from storycodex.cli import app
+from storycodex.plan_scenes import build_prompt, compact_worldcodex_context
 from storycodex.worldcodex_client import (
     CommandResult,
     WorldCodexClient,
@@ -171,3 +172,37 @@ def test_world_export_cli_writes_cache(tmp_path, monkeypatch) -> None:
     payload = __import__("json").loads(output_path.read_text())
     assert payload["metadata"]["world_id"] == "titan-osa"
     assert payload["kwargs"]["character_id"] == "character.elara"
+
+
+def test_plan_scenes_prompt_includes_compact_worldcodex_context() -> None:
+    context = {
+        "metadata": {"world_id": "titan-osa", "source_atom_ids": ["place.glass_harbor"]},
+        "places": [{"id": "place.glass_harbor", "type": "place", "name": "Glass Harbor", "summary": "A port."}],
+        "characters": [{"id": "character.elara", "type": "character", "name": "Elara Myung"}],
+        "relationships": [{"subject": "character.elara", "predicate": "works_in", "object": "place.glass_harbor"}],
+    }
+
+    compact = compact_worldcodex_context(context)
+    prompt = build_prompt(
+        {
+            "title": "Test",
+            "logline": "A test.",
+            "genre": ["fiction"],
+            "tone": ["tense"],
+            "target_length": {"unit": "words", "value": 1000},
+            "pov": "close_third",
+            "tense": "past",
+            "constraints": {"must": [], "must_not": []},
+        },
+        {"acts": [{"act_no": 1, "summary": "Setup", "chapters": [{"chapter_no": 1, "goal": "", "turning_points": [], "scenes": [1]}]}]},
+        None,
+        None,
+        context,
+    )
+
+    user_prompt = prompt[-1]["content"]
+    assert compact["places"][0]["id"] == "place.glass_harbor"
+    assert "WorldCodex context JSON" in user_prompt
+    assert "place.glass_harbor" in user_prompt
+    assert "character.elara" in user_prompt
+    assert "setting.location_id must be that place atom ID" in user_prompt

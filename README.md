@@ -14,7 +14,7 @@ pip install -e '.[test]'
 storycodex init --root .
 storycodex seed apply --root .
 storycodex plan spine --root .
-storycodex plan scenes --root .
+storycodex plan scenes --root . --world "$STORYCODEX_WORLDCODEX_WORLD"
 storycodex plan beats --root . --scene 1
 storycodex world export --root . --context story-context --character character.example
 storycodex build-context --root . --scene 1
@@ -70,7 +70,8 @@ Default backend is `auto`, which probes `{base_url}/v1/models` and falls back to
 Scenes planning:
 - `storycodex plan scenes --root .`
 - `storycodex plan scenes --root . --chapter 2`
-- Cast and location_id may be placeholders until character/world steps exist.
+- `storycodex plan scenes --root . --world "$STORYCODEX_WORLDCODEX_WORLD" --character character.example --location place.example`
+- When WorldCodex context is available, scene `setting.location_id` and `cast` should use WorldCodex atom IDs.
 
 Beats planning:
 - `storycodex plan beats --root . --scene 1`
