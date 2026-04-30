@@ -13,6 +13,8 @@ def ensure_dirs(root: Path) -> None:
         "artifacts",
         "artifacts/defaults",
         "artifacts/inputs",
+        "artifacts/story_state",
+        "artifacts/story_state/characters",
         "out",
     ]:
         path = root / rel
@@ -103,6 +105,10 @@ def scene_context_path(root: Path, scene_id: int) -> Path:
 
 def scene_context_meta_path(root: Path, scene_id: int) -> Path:
     return scenes_dir(root) / f"scene_{scene_id:03d}.context.meta.json"
+
+
+def character_state_path(root: Path, chapter_no: int) -> Path:
+    return root / "artifacts" / "story_state" / "characters" / f"ch{chapter_no:02d}.json"
 
 
 def worldcodex_cache_dir(root: Path) -> Path:

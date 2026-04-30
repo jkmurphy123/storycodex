@@ -1,6 +1,8 @@
 # storycodex
 
-StoryCodex provides a small CLI for initializing a workspace and applying seed overrides.
+StoryCodex plans, drafts, and checks story structure. WorldCodex owns canonical
+world-building data such as settings, characters, factions, relationships, and
+history.
 
 ## Quickstart
 
@@ -13,13 +15,15 @@ pip install -e '.[test]'
 ```bash
 storycodex init --root .
 storycodex seed apply --root .
+export STORYCODEX_WORLDCODEX_WORLD=titan-osa
+export STORYCODEX_WORLDCODEX_CLI=world
 storycodex plan spine --root .
-storycodex plan scenes --root . --world "$STORYCODEX_WORLDCODEX_WORLD"
+storycodex plan scenes --root .
 storycodex plan beats --root . --scene 1
-storycodex world export --root . --context story-context --character character.example
-storycodex build-context --root . --scene 1 --world "$STORYCODEX_WORLDCODEX_WORLD"
+storycodex build-context --root . --scene 1
 storycodex write scene --root . --scene 1
 storycodex check continuity --root . --scene 1
+storycodex propose-world-patch --root . --scene 1
 ```
 
 Seed overrides:
@@ -83,12 +87,13 @@ Context building:
 - Compiles Ring A/B/C context for drafting from plans and beats.
 - `storycodex build-context --root . --scene 1 --world "$STORYCODEX_WORLDCODEX_WORLD"`
 - When WorldCodex is configured, Ring B setting/cast and Ring C relevant facts/open threads are derived from WorldCodex exports.
-- Optional local artifacts remain for story-local continuity locks/facts and character state, not canonical world building.
+- Optional local artifacts remain only for story-local continuity locks/facts and chapter state under `artifacts/story_state/`; they are not canonical world building.
 
 WorldCodex boundary:
 - `storycodex world export --root . --context story-context` caches a WorldCodex export under `artifacts/worldcodex/`.
 - `STORYCODEX_WORLDCODEX_WORLD` should point to the WorldCodex world id or path.
-- Later milestones will use these exports directly in scene planning and context building.
+- StoryCodex does not author canonical places, characters, factions, relationships, conflicts, or history.
+- WorldCodex is the only tool that applies world/canon changes.
 
 Writing:
 - `storycodex write scene --root . --scene 1`

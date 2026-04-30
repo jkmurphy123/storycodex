@@ -10,6 +10,7 @@ from typing import Any
 
 from . import llm
 from .paths import (
+    character_state_path,
     inputs_plot_intent_path,
     inputs_spec_path,
     plot_spine_path,
@@ -495,25 +496,6 @@ def build_sources(
     return sources
 
 
-def select_resolution_artifact(base: Path, resolution: str) -> tuple[dict[str, Any] | None, str | None]:
-    order = resolution_order(resolution)
-    for res in order:
-        path = base / f"{res}.json"
-        if path.exists():
-            return json.loads(path.read_text()), res
-    return None, None
-
-
-def resolution_order(resolution: str) -> list[str]:
-    if resolution == "tiny":
-        return ["tiny", "medium", "full"]
-    if resolution == "medium":
-        return ["medium", "tiny", "full"]
-    if resolution == "full":
-        return ["full", "medium", "tiny"]
-    return ["tiny", "medium", "full"]
-
-
 def read_optional_json(path: Path, input_hashes: dict[str, str], key: str) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -550,7 +532,7 @@ def read_character_state(root: Path, scene_plan: dict[str, Any]) -> dict[str, An
     chapter_no = scene_plan.get("chapter_no")
     if not isinstance(chapter_no, int):
         return None
-    state_path = root / "artifacts" / "characters" / "state" / f"ch{chapter_no:02d}.json"
+    state_path = character_state_path(root, chapter_no)
     if not state_path.exists():
         return None
     return json.loads(state_path.read_text())
@@ -848,25 +830,6 @@ def references_overlap(left: str, right: str) -> bool:
         return False
     normalized_right = right.replace(".", "_").replace("-", "_")
     return any(token in normalized_right for token in tokens)
-
-
-def select_glossary_terms(world_data: dict[str, Any], ringB: dict[str, Any]) -> list[dict[str, Any]]:
-    glossary = world_data.get("glossary") if isinstance(world_data, dict) else None
-    if not isinstance(glossary, list):
-        return []
-
-    text_blob = json.dumps(ringB, sort_keys=True).lower()
-    selected = []
-    for entry in glossary:
-        if not isinstance(entry, dict):
-            continue
-        term = entry.get("term")
-        definition = entry.get("definition")
-        if not term or not definition:
-            continue
-        if term.lower() in text_blob:
-            selected.append({"term": term, "definition": definition})
-    return selected
 
 
 def prior_scene_text_path(root: Path, scene_id: int) -> Path | None:
