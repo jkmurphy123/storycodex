@@ -181,6 +181,7 @@ def build_patch_prompt(report: dict[str, Any], checker_input: dict[str, Any]) ->
     payload = json.dumps(checker_input, indent=2, sort_keys=True)
     return (
         "Generate a patch plan JSON matching scene-patch.schema.json. "
+        "This is a prose repair plan only, not a WorldCodex or canon patch. "
         "For each must-fix or uncovered beat, propose a minimal operation. "
         "Use target anchors as short exact substrings or PARAGRAPH:<n>. "
         "Include must_preserve with beat order and lock constraints.\n\n"

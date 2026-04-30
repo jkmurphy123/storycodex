@@ -32,6 +32,7 @@ from .build_context import build_context as run_build_context
 from .write_scene import write_scene as run_write_scene
 from .write_diary import write_diary as run_write_diary
 from .check_continuity import check_continuity as run_check_continuity
+from .worldcodex_patch_proposal import propose_world_patch as run_propose_world_patch
 from .worldcodex_client import WorldCodexClientError, build_worldcodex_client
 
 app = typer.Typer(help="StoryCodex CLI")
@@ -444,6 +445,51 @@ def check_continuity(
         typer.echo(json.dumps(result.report, indent=2, sort_keys=True))
     else:
         typer.secho("Continuity check complete.", fg=typer.colors.GREEN)
+
+
+@app.command("propose-world-patch")
+def propose_world_patch(
+    root: str = typer.Option(".", "--root", help="Root directory"),
+    scene: int = typer.Option(..., "--scene", help="Scene id"),
+    input_kind: str = typer.Option("draft", "--input", help="draft|final"),
+    model: str | None = typer.Option(None, "--model", help="Model name"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing outputs"),
+    run_id: str | None = typer.Option(None, "--run-id", help="Run identifier"),
+    preview: bool = typer.Option(False, "--preview", help="Validate and preview with WorldCodex"),
+    world: str | None = typer.Option(None, "--world", help="WorldCodex world id or path for --preview"),
+    json_output: bool = typer.Option(False, "--json", help="Print patch JSON"),
+) -> None:
+    """Propose durable WorldCodex updates from a drafted scene."""
+    if scene < 1:
+        typer.secho("--scene must be >= 1", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    if input_kind not in {"draft", "final"}:
+        typer.secho("--input must be draft|final", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    root_dir = root_path(root)
+    try:
+        result = run_propose_world_patch(
+            root_dir,
+            scene,
+            input_kind,
+            model,
+            force,
+            run_id,
+            preview=preview,
+            world=world,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    if result is None:
+        return
+
+    if json_output:
+        typer.echo(json.dumps(result.patch, indent=2, sort_keys=True))
+    else:
+        typer.secho(f"WorldCodex patch proposal saved at {result.patch_path}", fg=typer.colors.GREEN)
 
 
 def main():

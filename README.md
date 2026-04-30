@@ -98,3 +98,10 @@ Writing:
 Continuity check:
 - `storycodex check continuity --root . --scene 1`
 - Produces `continuity_report.json` and `patch.json` without modifying prose.
+- The patch file is a prose repair plan only; it is not a WorldCodex canon patch.
+
+WorldCodex patch proposal:
+- `storycodex propose-world-patch --root . --scene 1`
+- Reads the scene context, draft/final prose, and continuity report, then saves `out/scenes/scene_001.worldcodex_patch.json`.
+- Emits `worldcodex.patch.v1` for durable canon changes only. StoryCodex does not apply these patches.
+- Add `--preview --world <world-id-or-path>` to validate and preview the proposal through the WorldCodex CLI.
