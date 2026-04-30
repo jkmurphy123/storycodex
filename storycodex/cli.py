@@ -29,6 +29,7 @@ from .plan_scenes import plan_scenes as run_plan_scenes
 from .plan_beats import plan_beats as run_plan_beats
 from .build_context import build_context as run_build_context
 from .write_scene import write_scene as run_write_scene
+from .write_diary import write_diary as run_write_diary
 from .check_continuity import check_continuity as run_check_continuity
 
 app = typer.Typer(help="StoryCodex CLI")
@@ -280,6 +281,52 @@ def write_scene(
         typer.echo(result)
     else:
         typer.secho("Scene draft written.", fg=typer.colors.GREEN)
+
+
+@write_app.command("diary")
+def write_diary(
+    root: str = typer.Option(".", "--root", help="Root directory"),
+    scene: int = typer.Option(..., "--scene", help="Scene id"),
+    model: str | None = typer.Option(None, "--model", help="Model name"),
+    length: str = typer.Option("medium", "--length", help="Length: short|medium|long"),
+    target_words: int | None = typer.Option(None, "--target-words", help="Target word count"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing outputs"),
+    run_id: str | None = typer.Option(None, "--run-id", help="Run identifier"),
+    json_output: bool = typer.Option(False, "--json", help="Print draft text"),
+) -> None:
+    """Write a diary draft using the context packet."""
+    if scene < 1:
+        typer.secho("--scene must be >= 1", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    if length not in {"short", "medium", "long"}:
+        typer.secho("--length must be short|medium|long", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+    if target_words is not None and target_words < 1:
+        typer.secho("--target-words must be >= 1", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    root_dir = root_path(root)
+    try:
+        result = run_write_diary(
+            root_dir,
+            scene,
+            model,
+            length,
+            target_words,
+            force,
+            run_id,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+
+    if result is None:
+        return
+
+    if json_output:
+        typer.echo(result)
+    else:
+        typer.secho("Diary draft written.", fg=typer.colors.GREEN)
 
 
 @check_app.command("continuity")
