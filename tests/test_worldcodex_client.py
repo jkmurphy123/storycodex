@@ -8,6 +8,8 @@ import pytest
 from typer.testing import CliRunner
 
 from storycodex.cli import app
+from storycodex.build_context import build_context
+from storycodex.paths import scene_beats_path, scene_context_path, scene_plan_path
 from storycodex.plan_scenes import build_prompt, compact_worldcodex_context
 from storycodex.worldcodex_client import (
     CommandResult,
@@ -206,3 +208,119 @@ def test_plan_scenes_prompt_includes_compact_worldcodex_context() -> None:
     assert "place.glass_harbor" in user_prompt
     assert "character.elara" in user_prompt
     assert "setting.location_id must be that place atom ID" in user_prompt
+
+
+def test_build_context_uses_worldcodex_atoms_for_ring_b_and_c(tmp_path, monkeypatch) -> None:
+    story_spec_path = tmp_path / "artifacts" / "inputs" / "story_spec.json"
+    story_spec_path.parent.mkdir(parents=True, exist_ok=True)
+    story_spec_path.write_text(
+        __import__("json").dumps(
+            {
+                "title": "Test",
+                "logline": "A test.",
+                "genre": ["fiction"],
+                "tone": ["tense"],
+                "target_length": {"unit": "words", "value": 1000},
+                "pov": "close_third",
+                "tense": "past",
+                "constraints": {"must": [], "must_not": []},
+            }
+        )
+    )
+    scene_plan_path(tmp_path, 1).parent.mkdir(parents=True, exist_ok=True)
+    scene_plan_path(tmp_path, 1).write_text(
+        __import__("json").dumps(
+            {
+                "scene_id": 1,
+                "chapter_no": 1,
+                "title": "Harbor",
+                "setting": {"location_id": "place.glass_harbor", "time": "night", "mood_tags": ["tense"]},
+                "cast": ["character.elara"],
+                "goal": "Find the witness",
+                "stakes": "The trail goes cold",
+                "beats_ref": "artifacts/scenes/scene_001.beats.json",
+            }
+        )
+    )
+    scene_beats_path(tmp_path, 1).write_text(
+        __import__("json").dumps(
+            {"scene_id": 1, "beats": [{"type": "entry", "description": "Elara enters Glass Harbor."}]}
+        )
+    )
+
+    class FakeWorldCodexClient:
+        def export_context(self, context_type, **kwargs):
+            return {
+                "metadata": {"world_id": "titan-osa", "source_atom_ids": ["place.glass_harbor", "character.elara"]},
+                "places": [
+                    {
+                        "id": "place.glass_harbor",
+                        "type": "place",
+                        "name": "Glass Harbor",
+                        "summary": "A corporate port district under curfew.",
+                        "data": {"constraints": ["Security drones patrol the gantries."]},
+                    }
+                ],
+                "characters": [
+                    {
+                        "id": "character.elara",
+                        "type": "character",
+                        "name": "Elara Myung",
+                        "summary": "An investigator under pressure.",
+                        "data": {
+                            "role": "investigator",
+                            "voice_tics": ["precise"],
+                            "current_state": "exhausted but focused",
+                            "wants_now": ["find the witness"],
+                            "taboos": ["trusting officials"],
+                        },
+                    }
+                ],
+                "relationships": [
+                    {"subject": "character.elara", "predicate": "investigates", "object": "place.glass_harbor"}
+                ],
+                "timeline": [
+                    {
+                        "id": "event.lockdown",
+                        "type": "event",
+                        "name": "Harbor lockdown",
+                        "summary": "Glass Harbor was sealed after the vote.",
+                        "data": {"locations": ["place.glass_harbor"], "participants": ["character.elara"]},
+                    }
+                ],
+                "conflicts": [
+                    {
+                        "id": "conflict.harbor_access",
+                        "type": "conflict",
+                        "name": "Harbor access dispute",
+                        "summary": "Control of the port remains unresolved.",
+                    }
+                ],
+            }
+
+    monkeypatch.setattr("storycodex.build_context.build_worldcodex_client", lambda world=None: FakeWorldCodexClient())
+    monkeypatch.setattr("storycodex.build_context.validate_context", lambda context: [])
+    monkeypatch.setenv("STORYCODEX_BACKEND", "openai")
+
+    result = build_context(
+        tmp_path,
+        1,
+        6500,
+        "auto",
+        "all",
+        None,
+        False,
+        None,
+        world="titan-osa",
+    )
+
+    assert result is not None
+    context = __import__("json").loads(scene_context_path(tmp_path, 1).read_text())
+    assert context["ringB"]["setting"]["location"]["id"] == "place.glass_harbor"
+    assert context["ringB"]["setting"]["location"]["name"] == "Glass Harbor"
+    assert "Security drones patrol the gantries." in context["ringB"]["setting"]["location"]["constraints"]
+    assert context["ringB"]["cast"][0]["id"] == "character.elara"
+    assert context["ringB"]["cast"][0]["role"] == "investigator"
+    assert any("Harbor lockdown" in fact for fact in context["ringC"]["relevant_facts"])
+    assert any("Harbor access dispute" in thread for thread in context["ringC"]["open_threads"])
+    assert any(source["artifact_id"] == "worldcodex" for source in context["build"]["sources"])

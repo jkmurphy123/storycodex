@@ -271,6 +271,9 @@ def build_context(
     model: str | None = typer.Option(None, "--model", help="Model name"),
     force: bool = typer.Option(False, "--force", help="Overwrite existing outputs"),
     run_id: str | None = typer.Option(None, "--run-id", help="Run identifier"),
+    world: str | None = typer.Option(None, "--world", help="WorldCodex world id or path"),
+    world_context: str = typer.Option("story-context", "--world-context", help="WorldCodex context type"),
+    no_worldcodex: bool = typer.Option(False, "--no-worldcodex", help="Skip WorldCodex context during context building"),
     json_output: bool = typer.Option(False, "--json", help="Print context JSON"),
 ) -> None:
     """Build a scene context packet for prose drafting."""
@@ -290,7 +293,17 @@ def build_context(
     root_dir = root_path(root)
     try:
         result = run_build_context(
-            root_dir, scene, budget, resolution, include, model, force, run_id
+            root_dir,
+            scene,
+            budget,
+            resolution,
+            include,
+            model,
+            force,
+            run_id,
+            world=world,
+            world_context=world_context,
+            use_worldcodex=not no_worldcodex,
         )
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         typer.secho(str(exc), fg=typer.colors.RED)

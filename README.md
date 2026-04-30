@@ -17,7 +17,7 @@ storycodex plan spine --root .
 storycodex plan scenes --root . --world "$STORYCODEX_WORLDCODEX_WORLD"
 storycodex plan beats --root . --scene 1
 storycodex world export --root . --context story-context --character character.example
-storycodex build-context --root . --scene 1
+storycodex build-context --root . --scene 1 --world "$STORYCODEX_WORLDCODEX_WORLD"
 storycodex write scene --root . --scene 1
 storycodex check continuity --root . --scene 1
 ```
@@ -81,7 +81,9 @@ Beats planning:
 Context building:
 - `storycodex build-context --root . --scene 1`
 - Compiles Ring A/B/C context for drafting from plans and beats.
-- Optional artifacts: continuity locks/facts, world/characters at tiny/medium/full, character state.
+- `storycodex build-context --root . --scene 1 --world "$STORYCODEX_WORLDCODEX_WORLD"`
+- When WorldCodex is configured, Ring B setting/cast and Ring C relevant facts/open threads are derived from WorldCodex exports.
+- Optional local artifacts remain for story-local continuity locks/facts and character state, not canonical world building.
 
 WorldCodex boundary:
 - `storycodex world export --root . --context story-context` caches a WorldCodex export under `artifacts/worldcodex/`.

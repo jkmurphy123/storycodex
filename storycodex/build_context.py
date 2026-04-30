@@ -20,6 +20,7 @@ from .paths import (
     scenes_index_path,
     seed_style_profile_path,
 )
+from .worldcodex_client import WorldCodexClientError, build_worldcodex_client, get_worldcodex_world
 
 
 @dataclass
@@ -37,6 +38,9 @@ def build_context(
     model: str | None,
     force: bool,
     run_id: str | None,
+    world: str | None = None,
+    world_context: str = "story-context",
+    use_worldcodex: bool = True,
 ) -> BuildContextResult | None:
     context_path = scene_context_path(root, scene_id)
     if context_path.exists() and not force:
@@ -94,30 +98,18 @@ def build_context(
         "continuity_facts",
     )
 
-    world_data, world_resolution = select_resolution_artifact(
-        root / "artifacts" / "world", resolution
-    )
-    if world_data is not None:
-        optional_artifacts["world"] = {"data": world_data, "resolution": world_resolution}
-        input_hashes["world"] = sha256_text(json.dumps(world_data, sort_keys=True))
-
-    characters_data, characters_resolution = select_resolution_artifact(
-        root / "artifacts" / "characters", resolution
-    )
-    if characters_data is not None:
-        optional_artifacts["characters"] = {
-            "data": characters_data,
-            "resolution": characters_resolution,
-        }
-        input_hashes["characters"] = sha256_text(
-            json.dumps(characters_data, sort_keys=True)
-        )
+    worldcodex_context = None
+    if use_worldcodex:
+        worldcodex_context = load_worldcodex_context(story_spec, scene_plan, world=world, context_type=world_context)
+    if worldcodex_context is not None:
+        optional_artifacts["worldcodex"] = {"data": worldcodex_context, "resolution": resolution_for_context(resolution)}
+        input_hashes["worldcodex_context"] = sha256_text(json.dumps(worldcodex_context, sort_keys=True))
 
     state_data = read_character_state(root, scene_plan)
     if state_data is not None:
         optional_artifacts["character_state"] = {
             "data": state_data,
-            "resolution": characters_resolution or "tiny",
+            "resolution": "tiny",
         }
         input_hashes["character_state"] = sha256_text(
             json.dumps(state_data, sort_keys=True)
@@ -377,6 +369,7 @@ def build_ringB(
 
     cast_names = scene_plan.get("cast", []) if isinstance(scene_plan.get("cast", []), list) else []
     characters = build_cast(cast_names, optional_artifacts)
+    location = build_location(location_id, optional_artifacts)
 
     beats = scene_beats.get("beats", []) if isinstance(scene_beats, dict) else []
     beats = [beat for beat in beats if isinstance(beat, dict)]
@@ -388,11 +381,7 @@ def build_ringB(
     return {
         "scene_goal": scene_plan.get("goal", ""),
         "setting": {
-            "location": {
-                "id": location_id,
-                "name": location_id,
-                "constraints": [],
-            },
+            "location": location,
             "time": time,
             "mood_tags": mood_tags,
         },
@@ -410,17 +399,21 @@ def build_ringC(
     ringB: dict[str, Any],
 ) -> dict[str, Any]:
     open_threads: list[str] = []
-    if scenes_index and isinstance(scenes_index, dict):
+    worldcodex_context = optional_artifacts.get("worldcodex", {}).get("data")
+    if isinstance(worldcodex_context, dict):
+        open_threads = select_worldcodex_open_threads(worldcodex_context, ringB)
+    elif scenes_index and isinstance(scenes_index, dict):
         open_threads = []
 
     relevant_facts: list[str] = []
     if facts:
         relevant_facts = select_relevant_facts(facts, ringB)
+    if isinstance(worldcodex_context, dict):
+        relevant_facts = append_unique(relevant_facts, select_worldcodex_facts(worldcodex_context, ringB))
 
     glossary = []
-    world = optional_artifacts.get("world")
-    if world:
-        glossary = select_glossary_terms(world["data"], ringB)
+    if isinstance(worldcodex_context, dict):
+        glossary = select_worldcodex_glossary(worldcodex_context, ringB)
 
     return {
         "prior_scene_summary": prior_scene_summary,
@@ -563,8 +556,36 @@ def read_character_state(root: Path, scene_plan: dict[str, Any]) -> dict[str, An
     return json.loads(state_path.read_text())
 
 
+def build_location(location_id: str, optional_artifacts: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    worldcodex_context = optional_artifacts.get("worldcodex", {}).get("data")
+    place = find_worldcodex_atom(
+        worldcodex_context.get("places", []) if isinstance(worldcodex_context, dict) else None,
+        location_id,
+    )
+    if not place:
+        return {"id": location_id, "name": location_id, "constraints": []}
+
+    data = atom_data(place)
+    constraints = []
+    summary = place.get("summary")
+    if isinstance(summary, str) and summary.strip():
+        constraints.append(summary.strip())
+    for key in ("constraints", "story_constraints", "sensory_rules"):
+        constraints.extend(ensure_list(data.get(key)))
+    return {
+        "id": str(place.get("id", location_id)),
+        "name": str(place.get("name") or place.get("title") or place.get("id") or location_id),
+        "constraints": cap_rules([item for item in constraints if item], 8),
+    }
+
+
 def build_cast(cast_names: list[Any], optional_artifacts: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    characters_data = optional_artifacts.get("characters", {}).get("data")
+    worldcodex_context = optional_artifacts.get("worldcodex", {}).get("data")
+    characters_data = (
+        worldcodex_context.get("characters", [])
+        if isinstance(worldcodex_context, dict)
+        else None
+    )
     state_data = optional_artifacts.get("character_state", {}).get("data")
     characters = []
     for name in cast_names:
@@ -572,7 +593,8 @@ def build_cast(cast_names: list[Any], optional_artifacts: dict[str, dict[str, An
             continue
         entry = find_character(characters_data, name)
         if entry:
-            current_state = entry.get("current_state", "")
+            data = atom_data(entry)
+            current_state = entry.get("current_state") or data.get("current_state") or data.get("status") or entry.get("summary", "")
             if state_data:
                 state_override = find_character_state(state_data, entry)
                 if state_override:
@@ -581,11 +603,11 @@ def build_cast(cast_names: list[Any], optional_artifacts: dict[str, dict[str, An
                 {
                     "id": entry.get("id", name),
                     "name": entry.get("name", name),
-                    "role": entry.get("role", ""),
-                    "voice_tics": ensure_list(entry.get("voice_tics", [])),
+                    "role": entry.get("role") or data.get("role", ""),
+                    "voice_tics": ensure_list(entry.get("voice_tics", []) or data.get("voice_tics", []) or data.get("habits", [])),
                     "current_state": current_state,
-                    "wants_now": ensure_list(entry.get("wants_now", [])),
-                    "taboos": ensure_list(entry.get("taboos", [])),
+                    "wants_now": ensure_list(entry.get("wants_now", []) or data.get("wants_now", []) or data.get("goals", [])),
+                    "taboos": ensure_list(entry.get("taboos", []) or data.get("taboos", [])),
                 }
             )
         else:
@@ -601,6 +623,27 @@ def build_cast(cast_names: list[Any], optional_artifacts: dict[str, dict[str, An
                 }
             )
     return characters
+
+
+def atom_data(atom: Any) -> dict[str, Any]:
+    if isinstance(atom, dict) and isinstance(atom.get("data"), dict):
+        return atom["data"]
+    return {}
+
+
+def find_worldcodex_atom(data: Any, identifier: str) -> dict[str, Any] | None:
+    if not identifier:
+        return None
+    target = identifier.lower()
+    if isinstance(data, list):
+        for entry in data:
+            if not isinstance(entry, dict):
+                continue
+            entry_id = str(entry.get("id", "")).lower()
+            entry_name = str(entry.get("name", entry.get("title", ""))).lower()
+            if target in {entry_id, entry_name}:
+                return entry
+    return None
 
 
 def find_character(data: Any, name: str) -> dict[str, Any] | None:
@@ -711,6 +754,102 @@ def select_relevant_facts(facts: dict[str, Any], ringB: dict[str, Any]) -> list[
     return results
 
 
+def select_worldcodex_open_threads(context: dict[str, Any], ringB: dict[str, Any]) -> list[str]:
+    candidates = []
+    for key in ("open_threads", "conflicts"):
+        items = context.get(key)
+        if isinstance(items, list):
+            candidates.extend(items)
+
+    results: list[str] = []
+    text_blob = json.dumps(ringB, sort_keys=True).lower()
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        summary = worldcodex_atom_summary(item)
+        if not summary:
+            continue
+        item_blob = json.dumps(item, sort_keys=True).lower()
+        if references_overlap(text_blob, item_blob):
+            results.append(summary)
+        elif len(results) < 3:
+            results.append(summary)
+    return results[:6]
+
+
+def select_worldcodex_facts(context: dict[str, Any], ringB: dict[str, Any]) -> list[str]:
+    results: list[str] = []
+    text_blob = json.dumps(ringB, sort_keys=True).lower()
+
+    for event in context.get("timeline", []) if isinstance(context.get("timeline"), list) else []:
+        if not isinstance(event, dict):
+            continue
+        summary = worldcodex_atom_summary(event)
+        if summary and references_overlap(text_blob, json.dumps(event, sort_keys=True).lower()):
+            results.append(summary)
+
+    for rel in context.get("relationships", []) if isinstance(context.get("relationships"), list) else []:
+        if not isinstance(rel, dict):
+            continue
+        subject = rel.get("subject")
+        predicate = rel.get("predicate")
+        obj = rel.get("object")
+        if not subject or not predicate or not obj:
+            continue
+        fact = f"{subject} {predicate} {obj}"
+        if references_overlap(text_blob, fact.lower()):
+            results.append(fact)
+
+    for key in ("places", "characters", "factions"):
+        for atom in context.get(key, []) if isinstance(context.get(key), list) else []:
+            if not isinstance(atom, dict):
+                continue
+            summary = worldcodex_atom_summary(atom)
+            if summary and references_overlap(text_blob, json.dumps(atom, sort_keys=True).lower()):
+                results.append(summary)
+
+    return results[:12]
+
+
+def select_worldcodex_glossary(context: dict[str, Any], ringB: dict[str, Any]) -> list[dict[str, Any]]:
+    text_blob = json.dumps(ringB, sort_keys=True).lower()
+    glossary: list[dict[str, Any]] = []
+    for key in ("places", "characters", "factions", "conflicts"):
+        for atom in context.get(key, []) if isinstance(context.get(key), list) else []:
+            if not isinstance(atom, dict):
+                continue
+            atom_id = atom.get("id")
+            name = atom.get("name") or atom.get("title") or atom_id
+            summary = atom.get("summary") or atom_data(atom).get("logline")
+            if not name or not summary:
+                continue
+            atom_text = f"{atom_id} {name}".lower()
+            if references_overlap(text_blob, atom_text):
+                glossary.append({"term": str(name), "definition": str(summary)})
+    return glossary[:12]
+
+
+def worldcodex_atom_summary(atom: dict[str, Any]) -> str:
+    atom_id = atom.get("id")
+    name = atom.get("name") or atom.get("title") or atom_id
+    summary = atom.get("summary") or atom_data(atom).get("logline") or atom_data(atom).get("current_state")
+    if name and summary:
+        return f"{name}: {summary}"
+    if summary:
+        return str(summary)
+    if name:
+        return str(name)
+    return ""
+
+
+def references_overlap(left: str, right: str) -> bool:
+    tokens = {token for token in left.replace(".", "_").replace("-", "_").split() if len(token) >= 4}
+    if not tokens:
+        return False
+    normalized_right = right.replace(".", "_").replace("-", "_")
+    return any(token in normalized_right for token in tokens)
+
+
 def select_glossary_terms(world_data: dict[str, Any], ringB: dict[str, Any]) -> list[dict[str, Any]]:
     glossary = world_data.get("glossary") if isinstance(world_data, dict) else None
     if not isinstance(glossary, list):
@@ -819,3 +958,51 @@ def sha256_text(text: str) -> str:
     digest = hashlib.sha256()
     digest.update(text.encode("utf-8"))
     return digest.hexdigest()
+
+
+def load_worldcodex_context(
+    story_spec: dict[str, Any],
+    scene_plan: dict[str, Any],
+    *,
+    world: str | None,
+    context_type: str,
+) -> dict[str, Any] | None:
+    binding = story_spec.get("worldcodex") if isinstance(story_spec.get("worldcodex"), dict) else {}
+    resolved_world = world or binding.get("world") or get_worldcodex_world()
+    if not resolved_world:
+        return None
+
+    setting = scene_plan.get("setting") if isinstance(scene_plan.get("setting"), dict) else {}
+    location_id = setting.get("location_id", "") if isinstance(setting, dict) else ""
+    cast = scene_plan.get("cast", []) if isinstance(scene_plan.get("cast"), list) else []
+    character_id = first_atom_id(cast, prefix="character.") or binding.get("protagonist_id", "")
+    faction_id = first_atom_id(binding.get("primary_faction_ids"), prefix="") if isinstance(binding, dict) else ""
+    tag = first_atom_id(binding.get("tags"), prefix="") if isinstance(binding, dict) else ""
+    canon_tier = binding.get("canon_tier", "") if isinstance(binding, dict) else ""
+
+    client = build_worldcodex_client(world=resolved_world)
+    try:
+        return client.export_context(
+            context_type,
+            location_id=location_id if str(location_id).startswith("place.") else "",
+            character_id=character_id,
+            faction_id=faction_id,
+            tag=tag,
+            canon_tier=canon_tier,
+        )
+    except WorldCodexClientError as exc:
+        raise RuntimeError(f"Unable to load WorldCodex context for scene {scene_plan.get('scene_id')}: {exc}") from exc
+
+
+def first_atom_id(value: Any, *, prefix: str) -> str:
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and item.strip() and (not prefix or item.startswith(prefix)):
+                return item
+    if isinstance(value, str) and value.strip() and (not prefix or value.startswith(prefix)):
+        return value
+    return ""
+
+
+def resolution_for_context(resolution: str) -> str:
+    return resolution if resolution in {"tiny", "medium", "full"} else "tiny"
